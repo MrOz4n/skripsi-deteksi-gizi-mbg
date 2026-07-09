@@ -9,6 +9,24 @@ import pandas as pd
 import os
 import io
 
+import streamlit as st
+import tensorflow as tf
+import numpy as np
+from PIL import Image, ImageDraw
+from sqlalchemy import text
+from tensorflow.keras.models import load_model as keras_load_model
+import pickle
+
+original_dense_init = tf.keras.layers.Dense.__init__
+
+def patched_dense_init(self, *args, **kwargs):
+    # Buang paksa penyakitnya sebelum Keras sempat membacanya
+    kwargs.pop('quantization_config', None)
+    # Lanjutkan proses normal menggunakan fungsi asli
+    original_dense_init(self, *args, **kwargs)
+
+tf.keras.layers.Dense.__init__ = patched_dense_init
+
 # ==========================================
 # 1. SETTING HALAMAN & THEME DASHBOARD
 # ==========================================
