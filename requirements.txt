@@ -1,0 +1,8 @@
+streamlit
+tensorflow-cpu
+numpy
+Pillow
+SQLAlchemy
+PyMySQL
+pandas
+scikit-learn
