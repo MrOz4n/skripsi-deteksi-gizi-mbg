@@ -74,7 +74,7 @@ def load_model():
 
 @st.cache_resource
 def load_mlp_model():
-    mlp = keras_load_model('model_mlp_skripsi_terbaru.h5', compile=False)
+    mlp = keras_load_model('model_mlp_skripsi_terbaru.keras', compile=False)
     
     with open('scaler_area.pkl', 'rb') as f:
         scaler = pickle.load(f)
