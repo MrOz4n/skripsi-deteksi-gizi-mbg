@@ -72,14 +72,19 @@ def get_waktu_indonesia():
 def load_model():
     return tf.saved_model.load('model_ssd_skripsi_tfod/saved_model')
 
+class SafeDense(tf.keras.layers.Dense):
+    def __init__(self, **kwargs):
+        # Buang 'quantization_config' ke tempat sampah agar Keras tidak bingung
+        kwargs.pop('quantization_config', None)
+        super().__init__(**kwargs)
+
 @st.cache_resource
 def load_mlp_model():
-    # Pastikan ekstensi di sini adalah .keras
-    mlp = keras_load_model('model_mlp_skripsi_terbaru.keras', compile=False)
-
+    mlp = keras_load_model('model_mlp_skripsi_terbaru.keras', custom_objects={'Dense': SafeDense}, compile=False)
+    
     with open('scaler_area.pkl', 'rb') as f:
         scaler = pickle.load(f)
-
+        
     return mlp, scaler
 
 # Muat data CSV ke memori
