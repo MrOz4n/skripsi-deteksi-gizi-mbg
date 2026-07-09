@@ -1,5 +1,5 @@
 streamlit
-tensorflow-cpu
+tensorflow-cpu>=2.16.1
 numpy
 Pillow
 SQLAlchemy
