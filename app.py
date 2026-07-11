@@ -11,6 +11,9 @@ import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+tf.config.threading.set_intra_op_parallelism_threads(1)
+tf.config.threading.set_inter_op_parallelism_threads(1)
+
 original_dense_init = tf.keras.layers.Dense.__init__
 
 def patched_dense_init(self, *args, **kwargs):
@@ -395,14 +398,18 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
                 else:
                     st.success("✅ Hebat! Porsi gizi ideal dan sesuai standar Kemenkes.")
                     st.markdown("**💡 Saran Tindakan:** Komposisi gizi sudah seimbang. Pertahankan takaran ini.")
-            
             if st.button("💾 Simpan Hasil ke Riwayat Permanen"):
                 try:
+                    # Menarik waktu lokal (WIB)
+                    zona_wib = ZoneInfo("Asia/Jakarta")
+                    waktu_sekarang = datetime.now(zona_wib)
+                    waktu_simpan = waktu_sekarang.strftime("%Y-%m-%d %H:%M:%S")
+
                     with conn.session as s:
                         s.execute(text(
                             "INSERT INTO riwayat_mbg (waktu, target_grup, item_terdeteksi, total_kalori, ketercapaian) VALUES (:w, :tg, :it, :tk, :kc)"
                         ), {
-                            "w": get_waktu_indonesia(),
+                            "w": waktu_simpan,  # <-- Menggunakan variabel waktu_simpan yang baru
                             "tg": target_grup,
                             "it": ", ".join(list(unique_item_names)),
                             "tk": round(total_kalori, 2),
@@ -415,7 +422,6 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
                     
         else:
             st.info("Tidak ada makanan yang terdeteksi dengan jelas. Coba atur ulang sudut kamera atau ubah nilai slider 'Batas Keyakinan'.")
-
 
 # HALAMAN 3: RIWAYAT DETEKSI
 elif st.session_state.menu == "🕰️ Riwayat Deteksi":
