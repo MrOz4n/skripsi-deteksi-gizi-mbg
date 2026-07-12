@@ -11,18 +11,25 @@ import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+# Membatasi TensorFlow agar tidak rakus RAM/CPU di server Streamlit
 tf.config.threading.set_intra_op_parallelism_threads(1)
 tf.config.threading.set_inter_op_parallelism_threads(1)
 
+# ========== JURUS SUNTIK PAKSA (MONKEY PATCHING) ==========
+# 1. Simpan fungsi bawaan asli Keras ke dalam memori
 original_dense_init = tf.keras.layers.Dense.__init__
 
+# 2. Buat fungsi pencegat (interceptor)
 def patched_dense_init(self, *args, **kwargs):
     # Buang paksa penyakitnya sebelum Keras sempat membacanya
     kwargs.pop('quantization_config', None)
     # Lanjutkan proses normal menggunakan fungsi asli
     original_dense_init(self, *args, **kwargs)
 
+# 3. Ganti otak Keras dengan fungsi pencegat kita
 tf.keras.layers.Dense.__init__ = patched_dense_init
+# ==========================================================
+
 
 # ==========================================
 # 1. SETTING HALAMAN & THEME DASHBOARD
@@ -77,25 +84,13 @@ def load_history_data():
     except Exception:
         return pd.DataFrame(columns=["Waktu", "Target Grup", "Item Terdeteksi", "Total Kalori", "Ketercapaian (%)"])
 
-def get_waktu_indonesia():
-    hari_dict = {0: "Senin", 1: "Selasa", 2: "Rabu", 3: "Kamis", 4: "Jumat", 5: "Sabtu", 6: "Minggu"}
-    bulan_dict = {1: "Januari", 2: "Februari", 3: "Maret", 4: "April", 5: "Mei", 6: "Juni", 7: "Juli", 8: "Agustus", 9: "September", 10: "Oktober", 11: "November", 12: "Desember"}
-    now = pd.Timestamp.now()
-    return f"{hari_dict[now.dayofweek]}, {now.day:02d} {bulan_dict[now.month]} {now.year} - {now.strftime('%H:%M')} WIB"
-
 @st.cache_resource
 def load_model():
     return tf.saved_model.load('model_ssd_skripsi_tfod/saved_model')
 
-class SafeDense(tf.keras.layers.Dense):
-    def __init__(self, **kwargs):
-        # Buang 'quantization_config' ke tempat sampah agar Keras tidak bingung
-        kwargs.pop('quantization_config', None)
-        super().__init__(**kwargs)
-
 @st.cache_resource
 def load_mlp_model():
-    mlp = keras_load_model('model_mlp_skripsi_terbaru.keras', custom_objects={'Dense': SafeDense}, compile=False)
+    mlp = keras_load_model('model_mlp_skripsi_terbaru.keras', compile=False)
     
     with open('scaler_area.pkl', 'rb') as f:
         scaler = pickle.load(f)
@@ -105,21 +100,6 @@ def load_mlp_model():
 # Muat data CSV ke memori
 nutrition_df = load_nutrition_data()
 
-# Muat Model SSD
-try:
-    detect_fn = load_model()
-    model_loaded = True
-except Exception as e:
-    model_loaded = False
-    st.sidebar.error(f"⚠️ Model SSD gagal dimuat: {e}")
-
-# Muat Model MLP
-try:
-    mlp_model, area_scaler = load_mlp_model()
-    mlp_loaded = True
-except Exception as e:
-    mlp_loaded = False
-    st.sidebar.error(f"⚠️ Model MLP gagal dimuat: {e}")
 
 # ==========================================
 # 3. KAMUS KELAS, STATE, & FUNGSI LOGIN
@@ -158,7 +138,7 @@ def check_password():
     st.sidebar.subheader("🔒 Login Admin (Kelola Data)")
     password = st.sidebar.text_input("Password", type="password")
     if st.sidebar.button("Login"):
-        if password == "admin2026": 
+        if password == "admin_gizi_2026": 
             st.session_state["password_correct"] = True
             st.rerun()
         else:
@@ -169,7 +149,7 @@ def check_password():
 # 4. SIDEBAR NAVIGASI & KONTROL
 # ==========================================
 if os.path.exists("hero_image.png"):
-    st.sidebar.image("hero_image.png", use_container_width=True)
+    st.sidebar.image("hero_image.png", width='stretch')
 
 st.sidebar.title("📌 Menu Navigasi")
 selected_menu = st.sidebar.radio("Pilih Halaman:", [
@@ -200,7 +180,7 @@ if st.session_state.menu == "🏠 Halaman Utama":
     st.markdown("<div class='sub-title'>Menggunakan Algoritma SSD dan MLP pada Program Makan Bergizi Gratis</div>", unsafe_allow_html=True)
     
     if os.path.exists("hero_image.png"):
-        st.image("hero_image.png", use_container_width=True)
+        st.image("hero_image.png", width='stretch')
     
     st.markdown("""
     ### 📝 Tentang Aplikasi
@@ -216,6 +196,25 @@ if st.session_state.menu == "🏠 Halaman Utama":
 
 # HALAMAN 2: DETEKSI & ANALISIS GIZI (HYBRID)
 elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
+    
+    # MUAT MODEL HANYA KETIKA DI HALAMAN INI
+    # Muat Model SSD
+    try:
+        detect_fn = load_model()
+        model_loaded = True
+    except Exception as e:
+        model_loaded = False
+        st.sidebar.error(f"⚠️ Model SSD gagal dimuat: {e}")
+
+    # Muat Model MLP
+    try:
+        mlp_model, area_scaler = load_mlp_model()
+        mlp_loaded = True
+    except Exception as e:
+        mlp_loaded = False
+        st.sidebar.error(f"⚠️ Model MLP gagal dimuat: {e}")
+
+    
     st.markdown("<h2 style='text-align: center; color: #1B5E20;'>Analisis & Estimasi Gizi Cerdas (Hybrid AI)</h2>", unsafe_allow_html=True)
     
     target_grup = st.selectbox("🎯 Pilih Target Penerima MBG (Standar Kemenkes):", st.session_state.akg_df['Grup'].tolist())
@@ -241,7 +240,7 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
         
         col1, col2 = st.columns(2)
         with col1:
-            st.image(image, caption='📸 Gambar Input', use_container_width=True)
+            st.image(image, caption='📸 Gambar Input', width='stretch')
             
         with col2:
             with st.spinner("Model SSD sedang melokalisasi objek..."):
@@ -291,7 +290,7 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
                     draw.rectangle([(left, top), (right, bottom)], outline="#E65100", width=5)
                     draw.text((left + 5, top + 5), f"{class_name.replace('_', ' ').title()} {int(score*100)}%", fill="#E65100")
             
-            st.image(image, caption='🎯 Hasil Lokalisasi (NMS Applied)', use_container_width=True)
+            st.image(image, caption='🎯 Hasil Lokalisasi (NMS Applied)', width='stretch')
             
             buf = io.BytesIO()
             image.save(buf, format="JPEG")
@@ -461,7 +460,7 @@ elif st.session_state.menu == "🕰️ Riwayat Deteksi":
             df_filtered = df_filtered.sort_values(by="Total Kalori", ascending=True)
 
         # Tampilkan tabel
-        st.dataframe(df_filtered, use_container_width=True, hide_index=True)
+        st.dataframe(df_filtered, width='stretch', hide_index=True)
         
         # Tombol Unduh & Hapus
         col_act1, col_act2 = st.columns(2)
@@ -491,18 +490,18 @@ elif st.session_state.menu == "📊 Arsitektur Sistem":
     
     st.markdown("### 🛠️ 1. Arsitektur Jaringan Saraf Tiruan")
     if os.path.exists("arsitektur_lengkap.png"):
-        st.image("arsitektur_lengkap.png", use_container_width=True)
+        st.image("arsitektur_lengkap.png", width='stretch')
         
     st.markdown("---")
     col_arch1, col_arch2 = st.columns(2)
     with col_arch1:
         st.markdown("### 🧠 2. Skema Jaringan MLP")
         if os.path.exists("arsitektur_mlp.png"):
-            st.image("arsitektur_mlp.png", use_container_width=True)
+            st.image("arsitektur_mlp.png", width='stretch')
     with col_arch2:
         st.markdown("### 🎯 3. Lapisan Topologi SSD")
         if os.path.exists("arsitektur_ssd.png"):
-            st.image("arsitektur_ssd.png", use_container_width=True)
+            st.image("arsitektur_ssd.png", width='stretch')
 
 
 # HALAMAN 5: INFO MODEL & CARA KERJA AI
@@ -553,9 +552,9 @@ elif st.session_state.menu == "🔧 Manajemen Data & Gizi":
         
     else:
         st.info("👁️ Mode Lihat (Read-Only). Silakan login di panel sebelah kiri untuk menambah, mengedit, atau menghapus data.")
-        st.dataframe(nutrition_df, use_container_width=True)
+        st.dataframe(nutrition_df, width='stretch')
         
         st.markdown("---")
         st.markdown("### 📊 Tabel Standar Angka Kecukupan Gizi (AKG) Kemenkes")
         st.write("Data di bawah merujuk pada Permenkes No. 28 Tahun 2019.")
-        st.dataframe(st.session_state.akg_df, use_container_width=True)
+        st.dataframe(st.session_state.akg_df, width='stretch')
