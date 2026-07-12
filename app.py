@@ -43,7 +43,7 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    .main-title { font-size: 36px; font-weight: bold; color: #1B5E20; text-align: center; margin-bottom: 5px; }
+    .main-title { font-size: 36px; font-weight: bold; color: #6C63FF; text-align: center; margin-bottom: 5px; }
     .sub-title { font-size: 18px; color: #455A64; text-align: center; margin-bottom: 25px; }
     .metric-box { background-color: #E8F5E9; padding: 15px; border-radius: 8px; border-left: 5px solid #2E7D32; margin-bottom: 10px; text-align: center; }
     .step-box { background-color: #ffffff; padding: 15px; border-radius: 8px; border-left: 4px solid #FFA000; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
