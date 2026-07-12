@@ -215,7 +215,7 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
         st.sidebar.error(f"⚠️ Model MLP gagal dimuat: {e}")
 
     
-    st.markdown("<h2 style='text-align: center; color: #1B5E20;'>Analisis & Estimasi Gizi Cerdas (Hybrid AI)</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #6C63FF;'>Analisis & Estimasi Gizi Cerdas (Hybrid AI)</h2>", unsafe_allow_html=True)
     
     target_grup = st.selectbox("🎯 Pilih Target Penerima MBG (Standar Kemenkes):", st.session_state.akg_df['Grup'].tolist())
     
@@ -424,7 +424,7 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
 
 # HALAMAN 3: RIWAYAT DETEKSI
 elif st.session_state.menu == "🕰️ Riwayat Deteksi":
-    st.markdown("<h2 style='text-align: center; color: #1B5E20;'>Riwayat Analisis Gizi</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #6C63FF;'>Riwayat Analisis Gizi</h2>", unsafe_allow_html=True)
     
     df_history = load_history_data()
     
@@ -486,7 +486,7 @@ elif st.session_state.menu == "🕰️ Riwayat Deteksi":
 
 # HALAMAN 4: ARSITEKTUR SISTEM
 elif st.session_state.menu == "📊 Arsitektur Sistem":
-    st.markdown("<h2 style='text-align: center; color: #1B5E20;'>Arsitektur & Pemodelan Sistem</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #6C63FF;'>Arsitektur & Pemodelan Sistem</h2>", unsafe_allow_html=True)
     
     st.markdown("### 🛠️ 1. Arsitektur Jaringan Saraf Tiruan")
     if os.path.exists("arsitektur_lengkap.png"):
@@ -506,7 +506,7 @@ elif st.session_state.menu == "📊 Arsitektur Sistem":
 
 # HALAMAN 5: INFO MODEL & CARA KERJA AI
 elif st.session_state.menu == "🧠 Info Model & Cara Kerja AI":
-    st.markdown("<h2 style='text-align: center; color: #1B5E20;'>Model AI: SSD MobileNet V2</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #6C63FF;'>Model AI: SSD MobileNet V2</h2>", unsafe_allow_html=True)
     st.write("Sistem ini dibangun menggunakan algoritma **Single Shot Multibox Detector (SSD)** yang dipadukan dengan arsitektur ekstraktor fitur **MobileNet V2** melalui TensorFlow Object Detection API.")
     
     st.markdown("### 💡 Mengapa Menggunakan Model Ini?")
@@ -524,7 +524,7 @@ elif st.session_state.menu == "🧠 Info Model & Cara Kerja AI":
 
 # HALAMAN 6: MANAJEMEN DATA & GIZI (DENGAN AKSES LOGIN)
 elif st.session_state.menu == "🔧 Manajemen Data & Gizi":
-    st.markdown("<h2 style='text-align: center; color: #1B5E20;'>Panel Kelola Database Gizi</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #6C63FF;'>Panel Kelola Database Gizi</h2>", unsafe_allow_html=True)
     
     st.markdown("### 📝 Daftar Basis Data Gizi Makanan")
     
