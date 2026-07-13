@@ -201,7 +201,6 @@ if st.session_state.menu == "🏠 Halaman Utama":
 # HALAMAN 2: DETEKSI & ANALISIS GIZI (HYBRID)
 elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
     
-    # MUAT MODEL HANYA KETIKA DI HALAMAN INI
     # Muat Model SSD
     try:
         detect_fn = load_model()
@@ -242,9 +241,9 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
         image = Image.open(image_source).convert('RGB')
         image_np = np.array(image)
         
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([1, 2])
         with col1:
-            st.image(image, caption='📸 Gambar Input', width='stretch')
+            st.image(image, caption='📸 Input', width='stretch')
             
         with col2:
             with st.spinner("Model SSD sedang melokalisasi objek..."):
@@ -294,7 +293,7 @@ elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
                     draw.rectangle([(left, top), (right, bottom)], outline="#E65100", width=5)
                     draw.text((left + 5, top + 5), f"{class_name.replace('_', ' ').title()} {int(score*100)}%", fill="#E65100")
             
-            st.image(image, caption='🎯 Hasil Lokalisasi (NMS Applied)', width='stretch')
+            st.image(image, caption='🎯 Hasil Lokalisasi', width=400)
             
             buf = io.BytesIO()
             image.save(buf, format="JPEG")
