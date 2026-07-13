@@ -179,11 +179,15 @@ if st.session_state.menu == "🏠 Halaman Utama":
     st.markdown("<div class='main-title'>Sistem Deteksi Objek Makanan dan Estimasi Nilai Gizi</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub-title'>Menggunakan Algoritma SSD dan MLP pada Program Makan Bergizi Gratis</div>", unsafe_allow_html=True)
     
-    if os.path.exists("hero_image.png"):
-        st.image("hero_image.png", width='stretch')
+    # Membagi layar menjadi 3 kolom (kiri 1 part, tengah 1.5 part, kanan 1 part)
+    # Ini akan membuat gambar di tengah menjadi lebih kecil dan proporsional
+    col_img1, col_img2, col_img3 = st.columns([1, 1.5, 1])
+    with col_img2:
+        if os.path.exists("hero_image.png"):
+            st.image("hero_image.png", width='stretch')
     
     st.markdown("""
-    ### 📝 Tentang Aplikasi
+    📝 Tentang Aplikasi
     Sistem cerdas ini dirancang secara khusus untuk mendukung program **Makan Bergizi Gratis**. Dengan menggunakan arsitektur *end-to-end Machine Learning*, aplikasi ini mampu mendeteksi letak dan jenis lauk pada nampan secara *real-time* menggunakan **SSD (Single Shot Multibox Detector)**, kemudian mengestimasi nilai kalorinya melalui komputasi **MLP (Multi-Layer Perceptron)**.
     """)
     
@@ -193,7 +197,7 @@ if st.session_state.menu == "🏠 Halaman Utama":
         if st.button("🚀 Mulai Scan Makanan Sekarang", use_container_width=True):
             st.session_state.menu = "🔍 Deteksi & Analisis Gizi"
             st.rerun()
-
+            
 # HALAMAN 2: DETEKSI & ANALISIS GIZI (HYBRID)
 elif st.session_state.menu == "🔍 Deteksi & Analisis Gizi":
     
